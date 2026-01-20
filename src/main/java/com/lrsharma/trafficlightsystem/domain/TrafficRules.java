@@ -1,5 +1,7 @@
 package com.lrsharma.trafficlightsystem.domain;
 
+import com.lrsharma.trafficlightsystem.enums.Direction;
+
 public class TrafficRules {
 
     public static boolean isConflict(Direction d1, Direction d2) {

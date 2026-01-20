@@ -1,8 +1,8 @@
 package com.lrsharma.trafficlightsystem.service;
 
-import com.lrsharma.trafficlightsystem.domain.Direction;
+import com.lrsharma.trafficlightsystem.enums.Direction;
 import com.lrsharma.trafficlightsystem.domain.Intersection;
-import com.lrsharma.trafficlightsystem.domain.LightColor;
+import com.lrsharma.trafficlightsystem.enums.LightColor;
 import com.lrsharma.trafficlightsystem.domain.TrafficRules;
 import com.lrsharma.trafficlightsystem.exception.TrafficLightException;
 import com.lrsharma.trafficlightsystem.repository.HistoryRepository;

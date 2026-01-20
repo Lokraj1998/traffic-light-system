@@ -1,5 +1,8 @@
 package com.lrsharma.trafficlightsystem.domain;
 
+import com.lrsharma.trafficlightsystem.enums.Direction;
+import com.lrsharma.trafficlightsystem.enums.LightColor;
+
 public class TrafficLight {
     private final Direction direction;
     private LightColor color;

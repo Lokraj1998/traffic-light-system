@@ -1,5 +1,8 @@
 package com.lrsharma.trafficlightsystem.domain;
 
+import com.lrsharma.trafficlightsystem.enums.Direction;
+import com.lrsharma.trafficlightsystem.enums.LightColor;
+
 import java.util.EnumMap;
 import java.util.Map;
 

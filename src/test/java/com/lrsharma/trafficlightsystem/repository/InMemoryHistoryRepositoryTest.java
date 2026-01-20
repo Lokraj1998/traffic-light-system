@@ -1,7 +1,7 @@
 package com.lrsharma.trafficlightsystem.repository;
 
-import com.lrsharma.trafficlightsystem.domain.Direction;
-import com.lrsharma.trafficlightsystem.domain.LightColor;
+import com.lrsharma.trafficlightsystem.enums.Direction;
+import com.lrsharma.trafficlightsystem.enums.LightColor;
 import com.lrsharma.trafficlightsystem.domain.LightStateHistory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

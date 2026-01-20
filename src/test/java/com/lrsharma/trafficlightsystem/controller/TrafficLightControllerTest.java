@@ -1,6 +1,8 @@
 package com.lrsharma.trafficlightsystem.controller;
 
 import com.lrsharma.trafficlightsystem.domain.*;
+import com.lrsharma.trafficlightsystem.enums.Direction;
+import com.lrsharma.trafficlightsystem.enums.LightColor;
 import com.lrsharma.trafficlightsystem.exception.TrafficLightException;
 import com.lrsharma.trafficlightsystem.service.TrafficLightService;
 import org.junit.jupiter.api.Test;

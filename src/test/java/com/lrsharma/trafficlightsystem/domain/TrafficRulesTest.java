@@ -1,5 +1,6 @@
 package com.lrsharma.trafficlightsystem.domain;
 
+import com.lrsharma.trafficlightsystem.enums.Direction;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 

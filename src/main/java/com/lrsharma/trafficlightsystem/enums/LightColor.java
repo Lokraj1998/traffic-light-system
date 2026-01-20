@@ -1,4 +1,4 @@
-package com.lrsharma.trafficlightsystem.domain;
+package com.lrsharma.trafficlightsystem.enums;
 
 public enum LightColor {
     RED, YELLOW, GREEN

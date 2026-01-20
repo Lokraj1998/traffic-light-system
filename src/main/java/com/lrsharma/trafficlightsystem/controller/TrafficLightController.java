@@ -1,8 +1,8 @@
 package com.lrsharma.trafficlightsystem.controller;
 
-import com.lrsharma.trafficlightsystem.domain.Direction;
+import com.lrsharma.trafficlightsystem.enums.Direction;
 import com.lrsharma.trafficlightsystem.domain.Intersection;
-import com.lrsharma.trafficlightsystem.domain.LightColor;
+import com.lrsharma.trafficlightsystem.enums.LightColor;
 import com.lrsharma.trafficlightsystem.domain.TrafficLight;
 import com.lrsharma.trafficlightsystem.service.TrafficLightService;
 import org.springframework.http.ResponseEntity;
