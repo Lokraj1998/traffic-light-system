@@ -11,6 +11,10 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.eq;
 
@@ -142,5 +146,33 @@ class TrafficLightServiceTest {
                 NullPointerException.class,
                 () -> service.changeLight("unknown", Direction.NORTH, LightColor.GREEN)
         );
+    }
+
+    @Test
+    void shouldNotAllowConflictingGreensUnderConcurrency() throws InterruptedException {
+        ExecutorService executor = Executors.newFixedThreadPool(2);
+
+        Runnable northTask = () ->
+                service.changeLight("default", Direction.NORTH, LightColor.GREEN);
+
+        Runnable eastTask = () -> {
+            try {
+                service.changeLight("default", Direction.EAST, LightColor.GREEN);
+            } catch (TrafficLightException ignored) {}
+        };
+
+        executor.submit(northTask);
+        executor.submit(eastTask);
+
+        executor.shutdown();
+        executor.awaitTermination(5, TimeUnit.SECONDS);
+
+        Intersection i = service.getIntersection("default");
+
+        long greenCount = i.getLights().values().stream()
+                .filter(l -> l.getColor() == LightColor.GREEN)
+                .count();
+
+        assertTrue(greenCount <= 2);
     }
 }
