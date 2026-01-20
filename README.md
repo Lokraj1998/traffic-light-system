@@ -1,290 +1,337 @@
-🚦 Traffic Light Controller API
+# 🚦 Traffic Light Controller API
 
 A Spring Boot–based REST API to control traffic lights at an intersection.
 
 This project implements a simple, extensible traffic light system that supports:
 
-Multiple directions (NORTH, SOUTH, EAST, WEST)
+* Multiple directions (NORTH, SOUTH, EAST, WEST)
+* State transitions (RED, YELLOW, GREEN)
+* Pause and resume operations
+* Conflict validation (no unsafe green signals)
+* Timing history tracking
+* Concurrency-safe in-memory storage
 
-State transitions (RED, YELLOW, GREEN)
+The solution is intentionally designed to be **simple, clean, testable, and extensible**, in line with the kata requirements.
 
-Pause and resume operations
+---
 
-Conflict validation (no unsafe green signals)
+## 📌 Key Features
 
-Timing history tracking
+* Manage traffic light states for multiple directions
+* Prevent conflicting green signals
+* Pause and resume intersection operations
+* Track timing/state history
+* RESTful API design
+* Thread-safe in-memory storage
+* Clean separation of concerns
+* Comprehensive unit tests (controller, service, repository)
 
-Concurrency-safe in-memory storage
+---
 
-The solution is intentionally designed to be simple, clean, testable, and extensible, in line with the kata requirements.
+## 🏗️ Architecture Overview
 
-📌 Key Features
-
-Manage traffic light states for multiple directions
-
-Prevent conflicting green signals
-
-Pause and resume intersection operations
-
-Track timing/state history
-
-RESTful API design
-
-Thread-safe in-memory storage
-
-Clean separation of concerns
-
-Comprehensive unit tests (controller, service, repository)
-
-🏗️ Architecture Overview
+```
 controller
-└── TrafficLightController
+ └── TrafficLightController
 
 service
-└── TrafficLightService
+ └── TrafficLightService
 
 domain
-└── Intersection
-└── TrafficLight
-└── Direction (enum)
-└── LightColor (enum)
-└── LightStateHistory
+ └── Intersection
+ └── TrafficLight
+ └── Direction (enum)
+ └── LightColor (enum)
+ └── LightStateHistory
 
 repository
-└── HistoryRepository
-└── InMemoryHistoryRepository
+ └── HistoryRepository
+ └── InMemoryHistoryRepository
 
 exception
-└── TrafficLightException
-└── GlobalExceptionHandler
+ └── TrafficLightException
+ └── GlobalExceptionHandler
+```
 
-🔹 Design Decisions
-1. In-Memory Storage
+---
 
-The kata scope does not require persistence, so an in-memory repository (InMemoryHistoryRepository) is used.
+## 🔹 Design Decisions
+
+### 1. In-Memory Storage
+
+The kata scope does not require persistence, so an in-memory repository
+(`InMemoryHistoryRepository`) is used.
+
 It is thread-safe and easily replaceable with a database-backed implementation later.
 
-2. Concurrency
+---
 
-ConcurrentHashMap for intersection storage
+### 2. Concurrency
 
-CopyOnWriteArrayList for history
+* `ConcurrentHashMap` for intersection storage
+* `CopyOnWriteArrayList` for history
+* `synchronized` in service for state transitions
 
-synchronized in service for state transitions
+---
 
-3. Business Rules
+### 3. Business Rules
 
-NORTH & SOUTH may be green together
+* NORTH & SOUTH may be green together
+* EAST & WEST may be green together
+* Cross-axis greens are forbidden
+* Only GREEN transitions are validated
 
-EAST & WEST may be green together
+---
 
-Cross-axis greens are forbidden
+### 4. Error Handling
 
-Only GREEN transitions are validated
+All business and validation exceptions are handled centrally using
+`@RestControllerAdvice`.
 
-4. Error Handling
+---
 
-All business and validation exceptions are handled centrally using @RestControllerAdvice.
+## 🔹 API Endpoints
 
-🔹 API Endpoints
-Base URL
+### Base URL
+
+```
 http://localhost:8080/api/intersections
+```
 
-1️⃣ Get Current State
+---
 
-GET /api/intersections/{id}/state
+### 1️⃣ Get Current State
 
+**GET** `/api/intersections/{id}/state`
+
+```bash
 curl -X GET http://localhost:8080/api/intersections/default/state
+```
 
+**Response**
 
-Response
-
+```json
 {
-"NORTH": "RED",
-"SOUTH": "RED",
-"EAST": "RED",
-"WEST": "RED"
+  "NORTH": "RED",
+  "SOUTH": "RED",
+  "EAST": "RED",
+  "WEST": "RED"
 }
+```
 
-2️⃣ Change a Light Color
+---
 
-POST /api/intersections/{id}/change?direction={DIRECTION}&color={COLOR}
+### 2️⃣ Change a Light Color
 
+**POST** `/api/intersections/{id}/change?direction={DIRECTION}&color={COLOR}`
+
+```bash
 curl -X POST "http://localhost:8080/api/intersections/default/change?direction=NORTH&color=GREEN"
+```
 
+**Response**
 
-Response
-
+```
 HTTP 200 OK
+```
 
-3️⃣ Pause the Intersection
+---
 
-POST /api/intersections/{id}/pause
+### 3️⃣ Pause the Intersection
 
+**POST** `/api/intersections/{id}/pause`
+
+```bash
 curl -X POST http://localhost:8080/api/intersections/default/pause
+```
 
-4️⃣ Resume the Intersection
+---
 
-POST /api/intersections/{id}/resume
+### 4️⃣ Resume the Intersection
 
+**POST** `/api/intersections/{id}/resume`
+
+```bash
 curl -X POST http://localhost:8080/api/intersections/default/resume
+```
 
-5️⃣ Conflict Example
+---
+
+### 5️⃣ Conflict Example
 
 If NORTH is already GREEN:
 
+```bash
 curl -X POST "http://localhost:8080/api/intersections/default/change?direction=EAST&color=GREEN"
+```
 
+**Response**
 
-Response
-
+```json
 {
-"timestamp": "2026-01-20T11:15:30.123",
-"error": "Traffic Light Rule Violation",
-"message": "Cannot set EAST to GREEN because NORTH is already GREEN"
+  "timestamp": "2026-01-20T11:15:30.123",
+  "error": "Traffic Light Rule Violation",
+  "message": "Cannot set EAST to GREEN because NORTH is already GREEN"
 }
+```
 
+**HTTP Status:** `409 Conflict`
 
-HTTP Status: 409 Conflict
+---
 
-6️⃣ Invalid Input Example
+### 6️⃣ Invalid Input Example
+
+```bash
 curl -X POST "http://localhost:8080/api/intersections/default/change?direction=NORTH&color=BLUE"
+```
 
+**Response**
 
-Response
-
+```json
 {
-"timestamp": "2026-01-20T11:16:10.456",
-"error": "Bad Request",
-"message": "Invalid value 'BLUE' for parameter 'color'"
+  "timestamp": "2026-01-20T11:16:10.456",
+  "error": "Bad Request",
+  "message": "Invalid value 'BLUE' for parameter 'color'"
 }
+```
 
+**HTTP Status:** `400 Bad Request`
 
-HTTP Status: 400 Bad Request
+---
 
-🧪 Testing Strategy
+## 🧪 Testing Strategy
 
-This project follows a layered testing approach:
+This project follows a **layered testing approach**:
 
-1. Controller Tests (@WebMvcTest)
+### 1. Controller Tests (`@WebMvcTest`)
 
-Validates REST endpoints
+* Validates REST endpoints
+* Ensures proper HTTP status codes
+* Mocks service layer
+* Tests error handling
+* Tests invalid parameters
 
-Ensures proper HTTP status codes
+---
 
-Mocks service layer
+### 2. Service Tests (Pure Unit Tests)
 
-Tests error handling
+* Validates business rules
+* Prevents conflicting greens
+* Tests pause/resume logic
+* Verifies history persistence
+* Covers edge cases
 
-Tests invalid parameters
+---
 
-2. Service Tests (Pure Unit Tests)
+### 3. Repository Tests
 
-Validates business rules
+* Validates in-memory storage
+* Verifies isolation per intersection
+* Tests default behavior
+* Validates thread-safety
 
-Prevents conflicting greens
+---
 
-Tests pause/resume logic
+### Tools Used
 
-Verifies history persistence
+* JUnit 5
+* Mockito
+* Spring Test (MockMvc)
 
-Covers edge cases
+---
 
-3. Repository Tests
+## ▶️ Running the Application
 
-Validates in-memory storage
+### Prerequisites
 
-Verifies isolation per intersection
+* Java 17
+* Maven 3.8+
 
-Tests default behavior
+---
 
-Validates thread-safety
+### Build & Run
 
-All tests are written using:
-
-JUnit 5
-
-Mockito
-
-Spring Test (MockMvc)
-
-▶️ Running the Application
-Prerequisites
-
-Java 17
-
-Maven 3.8+
-
-Build & Run
+```bash
 mvn clean install
 mvn spring-boot:run
+```
 
-▶️ Running Tests
+---
+
+## ▶️ Running Tests
+
+```bash
 mvn test
+```
 
-⚠️ Known Limitations
+---
 
-In-memory storage (no persistence)
+## ⚠️ Known Limitations
 
-Single default intersection
+* In-memory storage (no persistence)
+* Single default intersection
+* No automatic light sequencing
+* No scheduling
+* No authentication or security
 
-No automatic light sequencing
+---
 
-No scheduling
-
-No authentication or security
-
-🚀 Future Improvements
+## 🚀 Future Improvements
 
 Given more time, I would:
 
-Add support for multiple intersections
+* Add support for multiple intersections
+* Add configurable light sequences
+* Add scheduling and timers
+* Persist history using a database
+* Add Swagger/OpenAPI
+* Add role-based access
+* Add real concurrency stress tests
 
-Add configurable light sequences
+---
 
-Add scheduling and timers
-
-Persist history using a database
-
-Add Swagger/OpenAPI
-
-Add role-based access
-
-Add real concurrency stress tests
-
-🎯 Why This Design
+## 🎯 Why This Design
 
 This implementation intentionally favors:
 
-Simplicity over over-engineering
+* Simplicity over over-engineering
+* Clean separation of concerns
+* Explicit business rules
+* Test-driven development
+* Clear error semantics
+* Extensibility
 
-Clean separation of concerns
+---
 
-Explicit business rules
+## 👤 Author
 
-Test-driven development
-
-Clear error semantics
-
-Extensibility
-
-👤 Author
-
-Lokraj Belbase
+**Lokraj Belbase**
 Java Full-Stack Developer
 Spring Boot • Microservices • AWS
 
-📝 Final Notes
+---
+
+## 📝 Final Notes
 
 This project was implemented as a coding kata.
+
 The focus was on:
 
-Clarity
+* Clarity
+* Clean code
+* Testability
+* Business rule enforcement
+* Narrative-style implementation
 
-Clean code
+---
 
-Testability
+## 🎉 Summary
 
-Business rule enforcement
+This solution demonstrates:
 
-Narrative-style implementation
+✔ Clean REST API design
+✔ Business rule enforcement
+✔ Thread-safe architecture
+✔ Layered testing
+✔ Production-grade error handling
+✔ Simple and extensible design
