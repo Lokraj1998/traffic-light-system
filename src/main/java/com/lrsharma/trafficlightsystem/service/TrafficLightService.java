@@ -23,7 +23,11 @@ public class TrafficLightService {
     }
 
     public Intersection getIntersection(String id) {
-        return intersections.get(id);
+        Intersection intersection = intersections.get(id);
+        if (intersection == null) {
+            throw new TrafficLightException("Intersection not found: " + id);
+        }
+        return intersection;
     }
 
     public synchronized void changeLight(String id, Direction direction, LightColor newColor) {
