@@ -288,20 +288,6 @@ Given more time, I would:
 * Add role-based access
 * Add real concurrency stress tests
 
----
-
-## 🎯 Why This Design
-
-This implementation intentionally favors:
-
-* Simplicity over over-engineering
-* Clean separation of concerns
-* Explicit business rules
-* Test-driven development
-* Clear error semantics
-* Extensibility
-
----
 
 ## 👤 Author
 
@@ -309,29 +295,4 @@ This implementation intentionally favors:
 Java Full-Stack Developer
 Spring Boot • Microservices • AWS
 
----
 
-## 📝 Final Notes
-
-This project was implemented as a coding kata.
-
-The focus was on:
-
-* Clarity
-* Clean code
-* Testability
-* Business rule enforcement
-* Narrative-style implementation
-
----
-
-## 🎉 Summary
-
-This solution demonstrates:
-
-✔ Clean REST API design
-✔ Business rule enforcement
-✔ Thread-safe architecture
-✔ Layered testing
-✔ Production-grade error handling
-✔ Simple and extensible design
